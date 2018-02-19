@@ -10,7 +10,7 @@ use Spatie\Backup\Tasks\Backup\BackupJobFactory;
 class BackupCommand extends BaseCommand
 {
     /** @var string */
-    protected $signature = 'backup:run {--filename=} {--only-db} {--only-files} {--only-to-disk=} {--disable-notifications}';
+    protected $signature = 'backup:run {--host=} {--db=} {--user=} {--pw=} {--port=} {--filename=} {--only-db} {--only-files} {--only-to-disk=} {--disable-notifications}';
 
     /** @var string */
     protected $description = 'Run the backup.';
@@ -24,8 +24,14 @@ class BackupCommand extends BaseCommand
         try {
             $this->guardAgainstInvalidOptions();
 
-            $backupJob = BackupJobFactory::createFromArray(config('backup'));
-
+            
+            if ($this->option('host') && $this->option('db') && $this->option('user') && $this->option('pw')) {
+                $list = array($this->option('host'),$this->option('db'),$this->option('user'),$this->option('pw'),$this->option('port'));
+                $backupJob = BackupJobFactory::createFromArray(config('backup'),$list);
+            }else{
+                $backupJob = BackupJobFactory::createFromArray(config('backup'));  
+            }
+            
             if ($this->option('only-db')) {
                 $backupJob->dontBackupFilesystem();
             }
